@@ -1,0 +1,24 @@
+{
+    "name": "eb-model",
+    "version": "1.0.0",
+    "description": "",
+    "main": "lib/model/model.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "tsc --watch"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Isaac-cura/eb-model.git"
+    },
+    "keywords": [],
+    "author": "José Isaac-cura",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Isaac-cura/eb-model/issues"
+    },
+    "homepage": "https://github.com/Isaac-cura/eb-model#readme",
+    "devDependencies": {
+        "typescript": "^3.3.3333"
+    }
+}
