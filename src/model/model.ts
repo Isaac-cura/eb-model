@@ -68,11 +68,19 @@ export abstract class Model{
     itsFull(keys:Array<string> = Object.keys(this) ):Boolean{
         keys = this.deleteKeys(keys)
         for(let i in keys){
-            console.log(keys[i],this[keys[i]]);
             if(!this[keys[i]])
                 return false;
         }
         return true;
+    }
+
+    filter(criteria:string,keys:Array<string>=Object.keys(this)):boolean{
+        keys = this.deleteKeys(keys);
+        for(let i in keys)
+            if(this[keys[i]] && (<string>this[keys[i]]).toLowerCase().match(criteria.toLowerCase()))
+                return true;
+
+        return false;
     }
 
     /**
