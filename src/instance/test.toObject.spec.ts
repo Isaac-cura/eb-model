@@ -9,8 +9,8 @@ describe('toObject method on class Model', () => {
 
     it("check to object method with all the properties",()=>{
         let rawObject = {
-            there:"value",
-            date:new Date()
+            name:"value",
+            lastname:new Date()
         };
         expect(new Test(rawObject).toObject()).toEqual(rawObject);
     });
@@ -65,8 +65,8 @@ describe('toObject method on class Model', () => {
     it("recursive toObject nested calls",()=>{
         let rawObject = {
             name: "Jose",
-            model: new Test({lastName:"Isaac-cura"})
+            lastname: new Test({lastname:"Isaac-cura"})
         }
-        expect(new Test(rawObject).toObject(["name","lastName:model.toObject.lastName"])).toEqual({name:"Jose",lastName:"Isaac-cura"});
+        expect(new Test(rawObject).toObject(["name","lastName:lastname.toObject.lastname"])).toEqual({name:"Jose",lastName:"Isaac-cura"});
     })
 });
