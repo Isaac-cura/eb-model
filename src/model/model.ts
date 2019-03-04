@@ -1,24 +1,27 @@
+
 /**
  * Class model to extends another model classes with common useful methods and properties
  * @class
  */
-export class Model{
+export abstract class Model{
     /**
      * @property keys to be deleteds in exporteds objects 
      */
     private toDelete = ["toDelete","rawObject"];
 
-    constructor(protected rawObject = {}){
+    constructor(protected rawObject = null){
         this.init();
     }
 
     /**
-     * @method deleteKeys - delete the properties of the objects
+     * @method deleteKeys - delete keys of array
+     * @param array - the array of keys which be applied minus operation with the toDelete array
      */
-    private deleteKeys(object:Object):Object{
+    private deleteKeys(array:Array<string>):Array<string>{
         for(let i in this.toDelete)
-            delete object[this.toDelete[i]];
-        return object;
+            if(~array.indexOf(this.toDelete[i]))
+                array.splice(array.indexOf(this.toDelete[i]),1);
+        return array;
     }
 
     /**
@@ -26,20 +29,19 @@ export class Model{
      * the nature of this methos is to be override for most complex objects that extends from it
      */
     init(){
-        Object.keys(this.rawObject).forEach((key:string)=>{
+        Object.keys(this.rawObject||{}).forEach((key:string)=>{
             this[key] = this.rawObject[key];
         });
-        const tipe = Object.keys(this.rawObject);
     }
 
     /**
      * @method toObject - return all properties of the model in a single object
-     * please in the child class document the posibles values for keys
      * @param keys - in the format ["name","mask:name","mask:name.property"] where name is property name
      * @return object with the asked properties
      */
     toObject(keys:Array<string> = Object.keys(this)):Object{
         let object:Object = {};
+        keys = this.deleteKeys(keys);
         keys.forEach(key=>{
             /**@var fk - formated key, using for deconstruct the masked key */
             let fk:Array<string> = key.split(":");
@@ -50,9 +52,37 @@ export class Model{
                 let value = object[fk[0]][fk[i]];
                 /**util if the propertie is a complex object and have a get */
                 object[fk[0]] = typeof value == "function"?object[fk[0]][fk[i]]():value; 
+                /**not return null values */
+                if(!object[fk[0]])
+                    delete object[fk[0]];
             }     
         });
-        console.log(object);
-        return this.deleteKeys(object);
+        return object;
     }
+
+    /**
+     * @method itsFull - verify if the giveds properties are filleds
+     * @param keys - keys to verify if null are the all properties of class initializeds(even if initialized with null)
+     * @returns if the class is filled
+     */
+    itsFull(keys:Array<string> = Object.keys(this) ):Boolean{
+        keys = this.deleteKeys(keys)
+        for(let i in keys){
+            console.log(keys[i],this[keys[i]]);
+            if(!this[keys[i]])
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * @abstract
+     * @method keys - method to safe use properties of the class
+     * @param keys - the properties alloweds to use, can use interface as a type
+     * @example 
+     * keys(keys:Array<"nameOfProperty" | "nameOfAnoherProperty">):Array<string>{
+     *  return keys;
+     * }
+     */
+    abstract keys(keys : Array<string>) : Array<string>;
 }
