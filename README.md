@@ -6,3 +6,11 @@ Can be used in any of most popullars frameworks/libraries typescript/javascript 
 Prerequisites
 
 npm & typescrip project it could work without typescript but it would not make much sense
+
+Installing
+
+add package to your project
+
+```javascript
+npm i eb-model
+```
