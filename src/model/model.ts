@@ -5,7 +5,7 @@
  */
 export abstract class Model{
 
-    protected checkable:Array<string> = [];
+    protected checkable:Array<string> = ["name","lastname"];
     /**
      * @property keys to be deleteds in exporteds objects 
      */

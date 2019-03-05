@@ -4,7 +4,13 @@
     "description": "",
     "main": "lib/model/model.js",
     "types": "lib/model/model.d.ts",
-    "files": ["lib/model/**/*"],
+    "bin": {
+        "eb": "lib/cli/cli.js"
+    },
+    "files": [
+        "lib/model/**/*",
+        "lib/cli/**/*"
+    ],
     "scripts": {
         "test": "nodemon --exec jasmine",
         "build": "tsc --watch"
@@ -13,7 +19,19 @@
         "type": "git",
         "url": "git+https://github.com/Isaac-cura/eb-model.git"
     },
-    "keywords": ["superclass", "ebloui", "model", "eb", "eb-model", "front", "end", "angular", "ionic", "react", "vue"],
+    "keywords": [
+        "superclass",
+        "ebloui",
+        "model",
+        "eb",
+        "eb-model",
+        "front",
+        "end",
+        "angular",
+        "ionic",
+        "react",
+        "vue"
+    ],
     "author": "José Isaac-cura",
     "license": "ISC",
     "bugs": {
@@ -25,7 +43,9 @@
         "typescript": "^3.3.3333"
     },
     "dependencies": {
+        "@types/ejs": "^2.6.3",
         "@types/jasmine": "^3.3.9",
+        "fs-extra": "^7.0.1",
         "nodemon": "^1.18.10"
     }
 }
