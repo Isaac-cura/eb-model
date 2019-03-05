@@ -26,7 +26,6 @@ function thereIsFile(file,actualPath,backPaths){
  */
 function basename():string{
     let packageBase = thereIsFile("package.json",process.cwd(),"");
-    console.log(packageBase);
     let basename:string = "";
     if(packageBase !== false)
         if(fs.existsSync(packageBase+"src/app"))
@@ -201,14 +200,11 @@ function init(args){
 }
 
 if(thereIsFile("package.json",process.cwd(),"") !== false){
-    console.log(ebModel());
     if(ebModel()!==false){
-        console.log(ebModel());
         init(args);
     }else{
         console.log("Installing necesary dependencies");
         let npm = require('npm-programmatic');
-        console.log(process.cwd()+thereIsFile("package.json",process.cwd(),""));
         npm.install(['eb-model'], {
             cwd:process.cwd()+thereIsFile("package.json",process.cwd(),""),
             save:true
