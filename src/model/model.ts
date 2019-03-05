@@ -4,6 +4,8 @@
  * @class
  */
 export abstract class Model{
+
+    protected checkable:Array<string> = ["name","lastname"];
     /**
      * @property keys to be deleteds in exporteds objects 
      */
@@ -39,7 +41,7 @@ export abstract class Model{
      * @param keys - in the format ["name","mask:name","mask:name.property"] where name is property name
      * @return object with the asked properties
      */
-    toObject(keys:Array<string> = Object.keys(this)):Object{
+    toObject(keys:Array<string> = this.checkable):Object{
         let object:Object = {};
         keys = this.deleteKeys(keys);
         keys.forEach(key=>{
@@ -65,7 +67,7 @@ export abstract class Model{
      * @param keys - keys to verify if null are the all properties of class initializeds(even if initialized with null)
      * @returns if the class is filled
      */
-    itsFull(keys:Array<string> = Object.keys(this) ):Boolean{
+    itsFull(keys:Array<string> = this.checkable ):Boolean{
         keys = this.deleteKeys(keys)
         for(let i in keys){
             if(!this[keys[i]])
@@ -74,7 +76,7 @@ export abstract class Model{
         return true;
     }
 
-    filter(criteria:string,keys:Array<string>=Object.keys(this)):boolean{
+    filter(criteria:string,keys:Array<string>=this.checkable):boolean{
         keys = this.deleteKeys(keys);
         for(let i in keys)
             if(this[keys[i]] && (<string>this[keys[i]]).toLowerCase().match(criteria.toLowerCase()))
@@ -83,10 +85,12 @@ export abstract class Model{
         return false;
     }
 
+
     /**
      * @abstract
      * @method keys - method to safe use properties of the class
      * @param keys - the properties alloweds to use, can use interface as a type
+     * <code>keys(){}</code>
      * @example 
      * keys(keys:Array<"nameOfProperty" | "nameOfAnoherProperty">):Array<string>{
      *  return keys;
