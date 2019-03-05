@@ -55,32 +55,42 @@ function ebModel():boolean{
     return installed;
 }
 
+
 ebModel();
 /**
  * template for eb-model Model child class
  * @param name name of the class and the interface
  */
 function getTemplate(name:string):string{
-    
-    let template =`
-import { Model } from "eb-model";
+    let propName = name[0].toLowerCase()+name.substr(1);
+    let template =`import { Model } from "eb-model";
 
 interface ${name}Interface{
+    /**Place your properties here*/
     prop1:string;
     prop2:string;
 }
-    
-export class ${name} extends Model{
 
+export class ${name} extends Model implements ${name}Interface{
+
+    prop1:string;
+    prop2:string;
+
+    /**
+     * @property checkable - contains the property names that the class will check in validations
+     */
     protected readonly checkable:Array<keyof ${name}Interface> = [
         "prop1",
         "prop2"
     ];
-    
-    constructor(rawObject = null){
-        super(rawObject);
+
+    constructor(${propName}:${name}Interface = null){
+        super(${propName});
     }
     
+    /**
+     * @override
+     */
     keys(keys:Array<keyof ${name}Interface>):Array<string>{
         return keys;
     }
