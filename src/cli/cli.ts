@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
@@ -37,7 +38,7 @@ function router(command:string,arg:string=null,flag:string = "-s"){
                 generateModel(arg,flag);
             break;
         default:
-            console.log("The command doesnt exist");
+            console.log("This ebloui command doesnt exist try with 'model'");
     }
 }
 
@@ -65,7 +66,6 @@ export function sanitize(name:string){
     /**check if name match with the format directory/directory/../filename */
     if(/^[a-zA-Z\-]([\/\\]{0,1}[a-zA-Z\-])+$/.test(path)){
         let splited = path.split(/[\/\\]/);
-        console.log(splited,"mark");
         for(let j in splited){
             let a = splited[j];
             for(let i= 0;i<a.length; i++){
@@ -80,12 +80,9 @@ export function sanitize(name:string){
             }
             splited[j] = a;	            
         }
-        console.log(splited);
         if((splited.length == 1) || ((splited.length>1) && (splited[splited.length-1] != splited[splited.length-2])))
             splited = splited.concat(splited[splited.length-1]);
-        console.log(splited);
         response["path"] = splited.join("/")+".ts";
-        console.log(response);
         let a = splited[splited.length-1];
         a = a.substr(0,1).toUpperCase()+a.substr(1);
         for(let i= 1;i<a.length; i++){
@@ -118,19 +115,19 @@ function generateModel(name,flag){
 let args:Array<string> = process.argv.slice(2);
 args.push("-");
 let maskedArg = [];
-maskedArg[0]="";
 let j = 0;
 for(let i = 1;i<args.length;i++)
-    if(!/^\-/.test(args[i]))
-        maskedArg[j]+=args[i]+" ";
-    else{
-        maskedArg[j] = <string>maskedArg[j].trim();
+    if(!/^\-/.test(args[i])){
+        maskedArg[j]=maskedArg[j]?(maskedArg[j]+args[i]+" "):args[i]+" ";
+    }else{
+        if(maskedArg[j])
+           maskedArg[j] = <string>maskedArg[j].trim();
         j++;
         if(args[i]!="-")
             maskedArg.push(args[i]);
     }
-console.log(args,maskedArg);
-args = [args[0]].concat(maskedArg);
+args = args.slice(0,args.length-1);
+args = args.length?[args[0]].concat(maskedArg):[];
 if(args.length>=3)
     router(args[0],args[1],args[2]);
 else if(args.length>=2)
