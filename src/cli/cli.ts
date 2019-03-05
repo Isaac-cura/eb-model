@@ -37,6 +37,27 @@ function basename():string{
 }
 
 /**
+ * check if eb-model is installed in the project
+ */
+function ebModel():boolean{
+    let packageJSON = thereIsFile("package.json",process.cwd(),"");
+    let jsonFile;
+    let installed = false;
+    if(packageJSON !== false){
+        jsonFile = fs.readFileSync(packageJSON+"package.json",{encoding: 'utf-8'});
+        if(jsonFile){
+            jsonFile = JSON.parse(jsonFile);
+            if(jsonFile["dependencies"])
+                installed = !(!jsonFile.dependencies["eb-model"]);
+            if(!installed && jsonFile["devDependencies"])
+                installed = !(!jsonFile.dependencies["eb-model"]);
+        }
+    }
+    return installed;
+}
+
+ebModel();
+/**
  * template for eb-model Model child class
  * @param name name of the class and the interface
  */
@@ -154,24 +175,53 @@ function generateModel(name,flag){
 }
 
 let args:Array<string> = process.argv.slice(2);
-args.push("-");
-let maskedArg = [];
-let j = 0;
-for(let i = 1;i<args.length;i++)
-    if(!/^\-/.test(args[i])){
-        maskedArg[0]=maskedArg[0]?(maskedArg[0]+args[i]+" "):args[i]+" ";
+
+function init(args){
+    args.push("-");
+    let maskedArg = [];
+    let j = 0;
+    for(let i = 1;i<args.length;i++)
+        if(!/^\-/.test(args[i])){
+            maskedArg[0]=maskedArg[0]?(maskedArg[0]+args[i]+" "):args[i]+" ";
+        }else{
+            if(maskedArg[0])
+               maskedArg[0] = <string>maskedArg[0].trim();
+            j++;
+            if(args[i]!="-")
+               maskedArg[1] = maskedArg[1]?maskedArg[1]+args[i]:args[i];
+        }
+    args = args.slice(0,args.length-1);
+    args = args.length?[args[0]].concat(maskedArg):[];
+    if(args.length>=3)
+        router(args[0],args[1],args[2]);
+    else if(args.length>=2)
+        router(args[0],args[1]);
+    else
+        console.log("Error creating a model");
+}
+
+if(thereIsFile("package.json",process.cwd(),"") !== false){
+    console.log(ebModel());
+    if(ebModel()!==false){
+        console.log(ebModel());
+        init(args);
     }else{
-        if(maskedArg[0])
-           maskedArg[0] = <string>maskedArg[0].trim();
-        j++;
-        if(args[i]!="-")
-           maskedArg[1] = maskedArg[1]?maskedArg[1]+args[i]:args[i];
+        console.log("Installing necesary dependencies");
+        let npm = require('npm-programmatic');
+        console.log(process.cwd()+thereIsFile("package.json",process.cwd(),""));
+        npm.install(['eb-model'], {
+            cwd:process.cwd()+thereIsFile("package.json",process.cwd(),""),
+            save:true
+        })
+        .then(function(){
+            init(args)
+        })
+        .catch(function(){
+            console.log("Unable to install package");
+        });
     }
-args = args.slice(0,args.length-1);
-args = args.length?[args[0]].concat(maskedArg):[];
-if(args.length>=3)
-    router(args[0],args[1],args[2]);
-else if(args.length>=2)
-    router(args[0],args[1]);
-else
-    console.log("Error creating a model");
+}else{
+    console.warn("Not npm project in this path")
+    init(args);
+}
+
