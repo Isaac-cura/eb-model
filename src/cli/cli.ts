@@ -1,7 +1,45 @@
 #!/usr/bin/env node
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import { stringify } from 'querystring';
+import { existsSync } from 'fs';
+import { SrvRecord } from 'dns';
 
+
+/**
+ * check if a file exist
+ * @param file - name of the file to search
+ * @param oldPath - 
+ * @param backPaths 
+ */
+function thereIsFile(file,actualPath,backPaths){
+    let futurePath = path.resolve(actualPath+"/..");
+    if(fs.existsSync(backPaths+file))
+        return backPaths
+    if(actualPath != futurePath)
+        return thereIsFile(file,futurePath,backPaths+"../");
+    return false;
+}
+
+/**
+ * get a different basesname if there is an src/app folder or src (angular/ionic by default)
+ */
+function basename():string{
+    let packageBase = thereIsFile("package.json",process.cwd(),"");
+    console.log(packageBase);
+    let basename:string = "";
+    if(packageBase !== false)
+        if(fs.existsSync(packageBase+"src/app"))
+            basename = packageBase+"src/app/";
+        else if(fs.existsSync(packageBase+"src"))
+            basename = packageBase+"src/";
+    return basename;
+}
+
+/**
+ * template for eb-model Model child class
+ * @param name name of the class and the interface
+ */
 function getTemplate(name:string):string{
     
     let template =`
@@ -13,7 +51,7 @@ interface ${name}Interface{
 }
     
 export class ${name} extends Model{
-    
+
     protected readonly checkable:Array<keyof ${name}Interface> = [
         "prop1",
         "prop2"
@@ -28,9 +66,14 @@ export class ${name} extends Model{
     }
 }`; 
     return template;
-
 }
 
+/**
+ * Enroute the commands of the cli
+ * @param command - the current command
+ * @param arg - name of the model
+ * @param flag - modifier of the functions
+ */
 function router(command:string,arg:string=null,flag:string = "-s"){
     switch(command){
         case "model":
@@ -42,17 +85,9 @@ function router(command:string,arg:string=null,flag:string = "-s"){
     }
 }
 
-export function directoryExist(filePath){
-    try {
-      return fs.statSync(filePath).isDirectory();
-    } catch (err) {
-      return false;
-    }
-  }
 
-export function getCurrentDirectoryBase(){
-    return path.basename(process.cwd());
-}
+
+
 
 /**
  * @function sanitize
@@ -95,16 +130,22 @@ export function sanitize(name:string){
     return false;
 }
 
+/**
+ * create the file
+ * @param name - name of the file
+ * @param flag - modifiers
+ */
 function generateModel(name,flag){
     let sep = path.sep;
     let response = sanitize(name);
-    fs.exists(`${response["path"]}`, function (exists) {
+    fs.exists(`${(/\-h/.test(flag)?"":basename())+response["path"]}`, function (exists) {
         if(!response)
             console.log("invalid Model name");
         else
-           if(!exists || (flag == "-h")){
-                fs.outputFile(`${response["path"]}`, getTemplate(response["name"]), 'utf8',function(){
-                    console.log("Model created successfully!");
+           if(!exists || ( /\-u/.test(flag))){/**unsafe mode */
+               /**check the hard mode*/
+                fs.outputFile(`${(/\-h/.test(flag)?"":basename())+response["path"]}`, getTemplate(response["name"]), 'utf8',function(){
+                    console.log("Model",response["name"], "created successfully!");
              });
             }
             else
@@ -118,13 +159,13 @@ let maskedArg = [];
 let j = 0;
 for(let i = 1;i<args.length;i++)
     if(!/^\-/.test(args[i])){
-        maskedArg[j]=maskedArg[j]?(maskedArg[j]+args[i]+" "):args[i]+" ";
+        maskedArg[0]=maskedArg[0]?(maskedArg[0]+args[i]+" "):args[i]+" ";
     }else{
-        if(maskedArg[j])
-           maskedArg[j] = <string>maskedArg[j].trim();
+        if(maskedArg[0])
+           maskedArg[0] = <string>maskedArg[0].trim();
         j++;
         if(args[i]!="-")
-            maskedArg.push(args[i]);
+           maskedArg[1] = maskedArg[1]?maskedArg[1]+args[i]:args[i];
     }
 args = args.slice(0,args.length-1);
 args = args.length?[args[0]].concat(maskedArg):[];
