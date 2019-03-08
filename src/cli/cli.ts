@@ -63,29 +63,32 @@ ebModel();
  */
 function getTemplate(name:string):string{
     let propName = name[0].toLowerCase()+name.substr(1);
-    let template =`import { Model } from "eb-model";
+    let template =`import { Model, ComplexDefinition } from "eb-model";
 
 interface ${name}Interface{
     /**Place your properties here*/
-    prop1:string;
-    prop2:string;
+    id:string;
 }
 
 export class ${name} extends Model implements ${name}Interface{
 
-    prop1:string;
-    prop2:string;
+    id:string;
 
     /**
      * @property checkable - contains the property names that the class will check in validations
      */
     protected readonly checkable:Array<keyof ${name}Interface> = [
-        "prop1",
-        "prop2"
+        "id"
     ];
+
+    /**
+     * @property _complex - contains the definition of complex objects
+     * /
+    protected readonly _complex = {};
 
     constructor(${propName}:${name}Interface = null){
         super(${propName});
+        this.init();
     }
     
     /**

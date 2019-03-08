@@ -4,15 +4,18 @@
  * @class
  */
 export abstract class Model{
+    /**Complex objects (Iterables,instances,checkeables,alias) */
+    protected _complex:Object = this._complex || {};
+    private _alias:Object = {};
+    private _iterables:Array<String> =[];
 
-    protected checkable:Array<string> = ["name","lastname"];
+    protected _checkable:Array<string> = [];
     /**
      * @property keys to be deleteds in exporteds objects 
      */
     private toDelete = ["toDelete","rawObject"];
 
     constructor(protected rawObject = null){
-        this.init();
     }
 
     /**
@@ -31,9 +34,36 @@ export abstract class Model{
      * the nature of this methos is to be override for most complex objects that extends from it
      */
     init(){
+        this.assign();
         Object.keys(this.rawObject||{}).forEach((key:string)=>{
-            this[key] = this.rawObject[key];
+            let iterable: Array<any> = [];
+            let name:string = this._alias[key]?this._alias[key]:key;
+            if(~this._iterables.indexOf(name))
+                iterable = this.rawObject[key];
+            else
+                iterable = [this.rawObject[key]];
+            for(let i in iterable)
+                if(~this._iterables.indexOf(name)){
+                    this[name] = this[name] || [];
+                    if(this._complex[name]){
+                        if(this._complex[name]["type"])
+                            this[name].push(new this._complex[name]["type"](iterable[i]))
+                        else
+                            this[name].push(iterable[i]);  
+                    }else 
+                        this[name].push(iterable[i]);
+                }
+                else{
+                    if(this._complex[name]){
+                        if(this._complex[name]["type"])
+                            this[name] = new this._complex[name]["type"](iterable[i]);
+                        else
+                            this[name] = iterable[i]; 
+                    }else
+                        this[name] = iterable[i];                  
+                }
         });
+
     }
 
     /**
@@ -41,7 +71,7 @@ export abstract class Model{
      * @param keys - in the format ["name","mask:name","mask:name.property"] where name is property name
      * @return object with the asked properties
      */
-    toObject(keys:Array<string> = this.checkable):Object{
+    toObject(keys:Array<string> = this._checkable):Object{
         let object:Object = {};
         keys = this.deleteKeys(keys);
         keys.forEach(key=>{
@@ -67,7 +97,7 @@ export abstract class Model{
      * @param keys - keys to verify if null are the all properties of class initializeds(even if initialized with null)
      * @returns if the class is filled
      */
-    itsFull(keys:Array<string> = this.checkable ):Boolean{
+    itsFull(keys:Array<string> = this._checkable ):Boolean{
         keys = this.deleteKeys(keys)
         for(let i in keys){
             if(!this[keys[i]])
@@ -76,7 +106,7 @@ export abstract class Model{
         return true;
     }
 
-    filter(criteria:string,keys:Array<string>=this.checkable):boolean{
+    filter(criteria:string,keys:Array<string>=this._checkable):boolean{
         keys = this.deleteKeys(keys);
         for(let i in keys)
             if(this[keys[i]] && (<string>this[keys[i]]).toLowerCase().match(criteria.toLowerCase()))
@@ -97,4 +127,38 @@ export abstract class Model{
      * }
      */
     abstract keys(keys : Array<string>) : Array<string>;
+    
+    /**
+     * Assign the complex object to other objects
+     */
+    assign(){
+        Object.keys(this._complex || {}).forEach(complexObjectKey=>{
+            let complexObject = this._complex[complexObjectKey];
+            if(typeof(complexObject) == "function")
+                this._complex[complexObjectKey] = {type:complexObject};
+            if(complexObject["alias"]){
+                this._alias[complexObject["alias"]] = complexObjectKey;
+            }
+            if(complexObject["iterable"]){
+                if(!(~this._iterables.indexOf(complexObjectKey)))
+                    this._iterables.push(complexObjectKey)
+            }
+            if(complexObject["checkeable"]){
+                if(!(~this._checkable.indexOf(complexObjectKey)))
+                    this._checkable.push(complexObjectKey)                
+            }
+        });
+    }
+    
+}
+
+interface _ComplexDefinition{
+    type?:Function;
+    alias?:string;
+    iterable?:Boolean;
+    checkable?:Boolean;
+}
+
+export interface ComplexDefinition{
+
 }
