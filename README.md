@@ -1,106 +1,150 @@
 # EBLOUI MODEL
 
-Superclass for typescript models that provides an architecture and common methods neededs in the models of data specially in front end.
-Can be used in any of most popullars frameworks/libraries typescript/javascript develpment. Also can be used in backend.
+Superclase para lo modelos de datos en typescrip que provee una arquitectura limpia y métodos comunes necesarios en los modelos de datos, especialmente en el front end.
 
-## Prerequisites
+## Requisitos
 
-npm & typescrip project it could work without typescript but it would not make much sense
+npm & un proyecto typescrip
 
 ## Installing
 
-add package to your project
+agregar el paquete a tu proyecto
 
 ```javascript
-npm i eb-model
+npm i -g eb-model
 ```
-
-then you can use in your custom models for your project
-
-patient.ts
-```typescript
-import { Model } from 'eb-model';
-
-interface PatientInterface{
-    name:string;
-    lastname:string;
-};
-
-export class Patient extends Model implements PatientInterface{
-
-    name:string = this.name || null;
-    lastname:string = this.lastname || null;
-    
-    constructor(private patient:PatientInterface = null){
-        super(patient);
-    }
-
-    keys(keys:Array<keyof PatientInterface>):Array<string>{
-        return keys;
-    }
-}
-```
-the key method is abstract so should be implemented. 
+es importante instalar el paquete de manera global para así poder hacer uso del cli más fácilmente
 
 ## Running the tests
 
 ```javascript
 npm run test
 ```
-## KEYS METHOD
-
-The function of keys method is prevent to use not allowed keys in the methods thats require keys, for example this works 
-
-
-```typescript
- let patient = new Patient();
- patient.itsFull(["name"]);
-```
-
-but can generate runtime erros or inconsistencies is the key does not exist
-
-```typescript
- let patient = new Patient();
- patient.itsFull(["NaMe"]);
-```
-to prevent that you can use key method
-
-```typescript
- let patient = new Patient();
- patient.itsFull(patient.keys(["name"]));
-```
-
-and the IDE will show the possible options and mark error if placing an incorrect one
 
 ## USAGE
 
-define a model
+Lo primero que debemos hacer es definir un modelo de datos, para ello haremos uso del cli incluido en esta biblioteca:
 
-patient.ts
-```typescript
-import { Model } from 'eb-model';
+*Lo primero es abrir una cónsola y situarnos en la raíz de nuestro proyecto.
+*Si nuestro proyecto tiene esta estructura src/app podemos quedarnos en la raíz, de no ser así situarnos en la carpeta donde queremos crear el modelo.
+*Luego hacemos uso del cli, en este ejemplo crearemos el model perro
 
-interface PatientInterface{
-    name:string;
-    lastname:string;
-};
+```
+eb model models/perro
+```
+*Si nuestro proyecto era un proyecto con una estructura src/app, podremos observar que se han creado el modelo perro, de la siguiente manera:
 
-export class Patient extends Model implements PatientInterface{
+src/app/models/perro/perro.ts
 
-    name:string = this.name || null;
-    lastname:string = this.lastname || null;
-    
-    constructor(private patient:PatientInterface = null){
-        super(patient);
-    }
+como se puede observar, se ha creado la carpeta models, y la carpeta perro, si el fichero hubiera existido con anterioridad no se habría sobreescrito, ya que por defecto el cli se encuentra en modo seguro(-s), si quiere que los archivos se puedan sobreescribir puede usar el flag -u, de la siguiente manera:
 
-    keys(keys:Array<keyof PatientInterface>):Array<string>{
-        return keys;
-    }
-}
+```
+eb model models/perro -u
+```
+esto nos permite crear el modelo aunque ya exista alguno con el mismo nombre en la misma ruta.
+
+Si no quisiéramos que nuestro fichero sea creado dentro de src/app, tenemos que usar el flag -h(hard mode) con lo cual se crearía nuestro modelo en la ruta en la que estemos situados:
+
+```
+eb model models/perro -u -h
 ```
 
-get the data, in this case from a const, but can be from the server
+##Una vision general del modelo creado
+
+*Al abrir nuestro modelo recién creado lo primero que nos encontraremos será con una interface que contendrá las propiedades de nuestro modelo, por defecto tiene un id ya que la mayoría de los modelos contendrá uno.
+
+```typescript
+interface PerroInterface{
+    /**Place your properties here*/
+    id:string;
+}
+```
+cada propiedad que contenga nuestro modelo deberá ser colocada allí
+
+*Nuestra clase implementa esa inferface así que debemos implementar las mismas propiedades en la clase del modelo que nos creó el cli, como ejemplo el cli implementa la propiedad id.
+
+```typescript
+export class ${name} extends Model implements ${name}Interface{
+
+    id:string;
+```
+esto puede parecer redundante, pero es necesario para el correcto funcionamiento de la función keys, útil para una inferencia dinámica de tipos que nos ahorrará bastante tiempo en un futuro.
+
+*Otra cosa importante es la propiedad _checkable que básicamente contiene las propiedades que serán usadas por las funciones cuando no se les pase ningún argumento. Por ejemplo si no se le pasa ningún argumento a la función isFill, comprobará que las propiedades en el arreglo _checkable no estén vacías.
+
+```typescript
+protected readonly _checkable:Array<keyof ${name}Interface> = [
+    "id"
+];
+```
+como pueden ver, por defecto agregamos la propiedad id
+
+*El objeto complex es una de la piezas fundamentales de la clase, como su nombre lo dice, sirve para definir el comportamiento de los objetos complejos, pues por lo general cuando consumimos api rest recibimos argumentos que queremos que se instancien.
+por ejemplo si recibimos una fecha como isostring y queremos que en nuestro sistema sea de tipo Date podemos usar el complex de la siguiente manera:
+```typescript
+/**
+ * @property _complex - contains the definition of complex objects
+ */
+protected readonly _complex = {
+  date:Date
+};
+```
+
+de esa manera al instanciar el modelo obtendríamos un objeto de tipo date(O de cualquier tipo)
+
+```typescript
+let myModel = new Model({date:"2019-03-08T22:33:08.160Z"});
+```
+ahora myModel.date es un objeto de tipo date
+
+*pero a veces no queremos simplemente instanciar un objeto, ¿qué pasaría si nuestro modelo en lugar de una sola fecha tuviera varias?, pues fácil, añadimos ese constraint en nuestro objeto complex
+
+```typescript
+/**
+ * @property _complex - contains the definition of complex objects
+ */
+protected readonly _complex = {
+  dates:{
+    type:Date,
+    iterable:true
+  }
+};
+```
+con lo cual al instanciar
+
+```typescript
+let myModel = new Model({dates:["2019-03-08T22:33:08.160Z",["2019-03-08T22:33:08.160Z"]});
+```
+ahora la propiedad myModel.dates contendrá un arreglo de fecchas
+
+*No siempre las propiedades que nos provee el servidor tienen el mismo nombre que las de nuestro modelo, por ello podemos usar alias:
+
+```typescript
+/**
+ * @property _complex - contains the definition of complex objects
+ */
+protected readonly _complex = {
+  date:{
+    type:Date,
+    alias:"fecha"
+  }
+};
+```
+con lo cual al instanciar
+
+```typescript
+let myModel = new Model({fecha:"2019-03-08T22:33:08.160Z"});
+```
+ obtenemos que myModel.date contiene la fecha obtenida del servidor
+
+cabe destacar que los alias solo funcionan en tiempo de ejecución, pues al escribir nuestro código no funcionarán ya que el constructor solo admite objetos del tipo nulo o del tipo declarado en la interfaz creada por el cli(que debe implementar las propiedades que hayamos definido en la misma).
+
+todos los constraints del objeto complex son independientes y combinables.
+
+
+#instanciando los modelos
+
+Lo primero es obtener la data, en este caso será desde una constante, pero también puede ser desde el servidor
 
 ```typescript
 const PATIENTS = [
@@ -113,37 +157,37 @@ const PATIENTS = [
   }];
 ```
 
-instance the model
+Luego instanciamos él, o los modelos
 
 ```typescript
   let patients:Array<Patient> =  PATIENTS.map(patient=> new Patient(patient));
 ```
-also can instance void
+también podemos instanciar un modelo vacío, bastante útil para cuando queremos registrar formularios que luego enviaremos al servidor
 
 ```typescript
   let patient:Patient = new Patient();
 ```
 
-### itsFull method
+### isFill method
 
-and if you want know if the all properties are fill(for forms validations for example) you can do this
+Si necesitamos saber qué propiedades están llenas(cuando registramos desde un formulario por ejemplo), podemos hacer lo siguiente, lo cual verificará si las propiedades provistas en el arreglo _checkable se encuentran llenas
 
 ```typescript
   if(patient.itsFull()) //false
     someFunction();
 ```
 
-or if you want only one or more functions can do this
+también podemos específicar las propiedades que nosotros querramos
 
 ```typescript
   patient.name = "José"
   if(patient.itsFull(["name"])) //true
     someFunction();
-  if(patient.itsFull(["lastname"])) //false
+  if(patient.itsFull(["name","lastname"])) //false
     someFunction();
 ```
 
-when you have many properties its difficult to remember them then you can use keys method then the ide will make suggestions and mark errors
+cuando tenemos muchas propiedades es difícil recordarlas todas, para ello podemos usar el método keys, el cual debido a la inferencia de tipos le permite al IDE hacernos sugerencias de las posibles propiedades que podemos usar(por esto la interface)
 
 ```typescript
   patient.name = "José"
@@ -153,7 +197,7 @@ when you have many properties its difficult to remember them then you can use ke
 
 ### filter method
 
-when you need know if the person match with a criteria you can use this method
+Cuando necesitemos saber si un modelo cumple con un criterio de búsqueda podemos usar el método filter
 
 ```typescript
   patient.name = "José";
@@ -172,7 +216,7 @@ when you need know if the person match with a criteria you can use this method
     someFunction();
 ```
 
-With a little imagination you can do really interesting things, you can, for example, get people from a list that match with the search criteria
+Con un poco de imaginación podemos hacer cosas realmente interesantes. Por ejemplo, podemos obtener la lista que coincide con un criterio:
 
 ```typescript
 const PATIENTS = [
@@ -195,13 +239,12 @@ const PATIENTS = [
 
 ### toObject method
 
-when you interact with the server you not always control the data model that he receives then you can use toObject method
+Cuando interactuamos con el servidor no siempre tenemos control de los nombres de las propiedades que ellos reciben
 
 ```typescript
 let patient:Patient = new Patient({
   name:"José",
   lastname:"Isaac-cura",
-  // imagine that this property exists in our model person
   phones:{
     one:"0412-444-44-44",
     two:"0212-222-22-22"
@@ -210,37 +253,23 @@ let patient:Patient = new Patient({
 
 let object = patient.toObject(); //{name:"Jose",lastname:"Isaac-cura",phones:{one:"0412-444-44-44",two:"0212-222-22-22"}} 
 ```
-if the server need the keys in cappital you can masked the object with this syntax "MaskedName:name"
+Si el servidor necesita los nombres de las propiedades con la primera letra en mayúsculas podemos enmascarar el objeto con la siguiente sintaxis "MaskedName:name"
 
 ```typescript
   let object = patient.toObject(["NAME:name","LaStNaMe:lastname","phones"]); //{NAME:"Jose",LaStNaMe:"Isaac-cura",phones:{one:"0412-444-44-44",two:"0212-222-22-22"}} 
 ```
 
-if u need a nested property u can use this syntax "MaskedName:name.property" or "name.property"
+si necesitamos una propiedad anidada podemos usar la siguiente sintaxis "MaskedName:name.property" o "name.property"
 
 ```typescript
   let object = patient.toObject(["mobile:phones.one","phones.two"]); //{mobile:"0412-444-44-44",phones:"0212-222-22-22"} 
 ```
 
-You can even use functions in case of complex object with this sintax "MaskedName:property.function" or "property.function"
+Puedes incluso usar funciones, en caso de tratarse de objetos complejos, con la siguiente sintaxis  "MaskedName:property.function" or "property.function"
 
 ```typescript
   let object = patient.toObject(["name.toUpperCase","phone:phones.two.toLowerCase"]); //{name:"JOSE",phone:"0212-222-22-22"} 
 ```
-
-## tips
-
-* when extends a Model and create your own model initialice the properties like this
-
- ```typescript
- name:string = this.name || null
- ```
- 
- this because when itsFill method not receive params it search in all properties of the class to compare with all, but it is in runtime then, is the propertie are not initialized not exist in runtime then if have no value the function omit it. 
- Only is relevant is the propertie never has value and itsFull is called without any arg, otherwise this tip is not relevant
- 
-
-
 
 ## Authors
 * José Isaac-cura

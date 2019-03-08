@@ -6,8 +6,8 @@
 export abstract class Model{
     /**Complex objects (Iterables,instances,checkeables,alias) */
     protected _complex:Object = this._complex || {};
-    private _alias:Object = {};
-    private _iterables:Array<String> =[];
+    private _alias:Object = this._alias || {};
+    private _iterables:Array<String> =this._iterables || [];
 
     protected _checkable:Array<string> = [];
     /**
@@ -93,11 +93,11 @@ export abstract class Model{
     }
 
     /**
-     * @method itsFull - verify if the giveds properties are filleds
+     * @method isFill - verify if the giveds properties are filleds
      * @param keys - keys to verify if null are the all properties of class initializeds(even if initialized with null)
      * @returns if the class is filled
      */
-    itsFull(keys:Array<string> = this._checkable ):Boolean{
+    isFill(keys:Array<string> = this._checkable ):Boolean{
         keys = this.deleteKeys(keys)
         for(let i in keys){
             if(!this[keys[i]])
