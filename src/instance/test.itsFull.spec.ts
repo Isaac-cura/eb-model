@@ -5,7 +5,7 @@ describe("itsFull method of Model",()=>{
         let rawObject = {
             name:"Jose"
         }
-        expect(new Test(rawObject).itsFull()).toBeFalsy();
+        expect(new Test(rawObject).isFill()).toBeFalsy();
     });
 
     it("check if all properties are full",()=>{
@@ -13,7 +13,7 @@ describe("itsFull method of Model",()=>{
             name:"Jose",
             lastname:"Isaac-cura"
         };
-        expect(new Test(rawObject).itsFull()).toBeTruthy();
+        expect(new Test(rawObject).isFill()).toBeTruthy();
     });
 
     it("check if all gives properties are full",()=>{
@@ -21,7 +21,7 @@ describe("itsFull method of Model",()=>{
             name:"Jose",
         };
         let test = new Test(rawObject);
-        expect(test.itsFull(test.keys(["name"]))).toBeTruthy();
+        expect(test.isFill(test.keys(["name"]))).toBeTruthy();
     });
 
     it("check if all gives properties are not full",()=>{
@@ -29,6 +29,6 @@ describe("itsFull method of Model",()=>{
             name:"Jose",
         };
         let test = new Test(rawObject);
-        expect(test.itsFull(test.keys(["name","lastname"]))).toBeFalsy();
+        expect(test.isFill(test.keys(["name","lastname"]))).toBeFalsy();
     });
 })

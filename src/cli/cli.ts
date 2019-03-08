@@ -77,7 +77,7 @@ export class ${name} extends Model implements ${name}Interface{
     /**
      * @property checkable - contains the property names that the class will check in validations
      */
-    protected readonly checkable:Array<keyof ${name}Interface> = [
+    protected readonly _checkable:Array<keyof ${name}Interface> = [
         "id"
     ];
 
