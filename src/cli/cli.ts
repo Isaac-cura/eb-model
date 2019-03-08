@@ -83,7 +83,7 @@ export class ${name} extends Model implements ${name}Interface{
 
     /**
      * @property _complex - contains the definition of complex objects
-     * /
+     */
     protected readonly _complex = {};
 
     constructor(${propName}:${name}Interface = null){
