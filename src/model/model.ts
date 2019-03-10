@@ -37,12 +37,15 @@ export abstract class Model{
         this.assign();
         Object.keys(this.rawObject||{}).forEach((key:string)=>{
             let iterable: Array<any> = [];
-            let name:string = this._alias[key]?this._alias[key]:key;
+            let name:string = this._alias[key]?this._alias[key]["name"]:key;
+            let props:Array<string> = this._alias[key]?this._alias[key]["props"]:undefined;
             if(~this._iterables.indexOf(name))
                 iterable = this.rawObject[key];
             else
                 iterable = [this.rawObject[key]];
-            for(let i in iterable)
+            for(let i in iterable){
+                for(let k in props)
+                    iterable[i] = typeof(iterable[i][props[k]]) == "function"? iterable[i][props[k]]():iterable[i][props[k]];
                 if(~this._iterables.indexOf(name)){
                     this[name] = this[name] || [];
                     if(this._complex[name]){
@@ -62,6 +65,7 @@ export abstract class Model{
                     }else
                         this[name] = iterable[i];                  
                 }
+            }
         });
 
     }
@@ -137,7 +141,11 @@ export abstract class Model{
             if(typeof(complexObject) == "function")
                 this._complex[complexObjectKey] = {type:complexObject};
             if(complexObject["alias"]){
-                this._alias[complexObject["alias"]] = complexObjectKey;
+                let splited = complexObject["alias"].split(".");
+                this._alias[splited[0]] = {}
+                this._alias[splited[0]]["name"] = complexObjectKey;
+                if(splited.length>1)
+                    this._alias[splited[0]]["props"] = splited.splice(1);
             }
             if(complexObject["iterable"]){
                 if(!(~this._iterables.indexOf(complexObjectKey)))
