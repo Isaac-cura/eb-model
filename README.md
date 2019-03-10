@@ -26,8 +26,8 @@ npm run test
 Lo primero que debemos hacer es definir un modelo de datos, para ello haremos uso del cli incluido en esta biblioteca:
 
 *Lo primero es abrir una cónsola y situarnos en la raíz de nuestro proyecto.
-*Si nuestro proyecto tiene esta estructura src/app podemos quedarnos en la raíz, de no ser así situarnos en la carpeta donde queremos crear el modelo.
-*Luego hacemos uso del cli, en este ejemplo crearemos el model perro
+*Si nuestro proyecto tiene esta estructura src/app podemos quedarnos en la raíz, de no ser así debemos situarnos en la carpeta donde queremos crear el modelo.
+*Luego haremos uso del cli, en este ejemplo crearemos el model perro
 
 ```
 eb model models/perro

@@ -15,6 +15,8 @@ export class Complex extends Model{
     dat:Date;
     dates;
     name:string;
+    dateInt:number;
+    nameM:string;
     protected  _checkable:Array<keyof testInterface> = [
     ];
 
@@ -27,6 +29,12 @@ export class Complex extends Model{
         },
         name:{
             alias:"nombre"
+        },
+        dateInt:{
+            alias:"dateTime.timestamp"
+        },
+        nameM:{
+            alias:"apellido.toUpperCase.toLowerCase"
         }
     }
 
