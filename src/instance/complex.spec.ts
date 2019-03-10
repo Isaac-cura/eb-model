@@ -58,4 +58,22 @@ describe("Test for complex models",()=>{
         expect(bool).toBeTruthy();
     });
 
+    it("check access to props in complex aliases",()=>{
+        let rawObject = {
+            dateTime:{
+                timestamp:5
+            }
+        };
+        expect(new Complex(rawObject).dateInt).toEqual(5);
+    });
+
+    it("check recursive access to methods in complex aliases",()=>{
+        let rawObject = {
+            nombre: "Jose",
+            apellido:"Isaac"
+        }
+        expect(new Complex(rawObject).name).toEqual("Jose");
+        expect(new Complex(rawObject).nameM).toEqual("isaac");        
+    });
+
 });

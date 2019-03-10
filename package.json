@@ -1,6 +1,6 @@
 {
     "name": "eb-model",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "description": "",
     "main": "lib/model/model.js",
     "types": "lib/model/model.d.ts",
